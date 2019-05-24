@@ -74,7 +74,7 @@ def checkDirection(x, y, dx, dy):
 		other = nodes[(x, y)]
 	else:
 		other = addNode(x, y)
-	return (other, distance, x, y)
+	return (other, distance)
 
 def checkAndCreateEdge(x, y, direction):
 	dx = 0
@@ -93,11 +93,10 @@ def checkAndCreateEdge(x, y, direction):
 	if ret is None:
 		return
 
-	end, distance, endX, endY = ret
+	end, distance = ret
 	start = nodes[(x, y)]
 
-	if (endX, endY) in unvisited:
-		edges.append((start, end, distance, direction))
+	edges.append((start, end, distance, direction))
 
 def findStart():
 	for y in range(0, height):
@@ -123,9 +122,9 @@ while len(unvisited) > 0:
 	checkAndCreateEdge(x, y, DIRECTION_NORTH)
 	checkAndCreateEdge(x, y, DIRECTION_SOUTH)
 
-print("count - %d" % len(edges))
-print("start - %d" % startNode)
-print("end - %d" % endNode)
+print("count-%d" % len(edges))
+print("start-%d" % startNode)
+print("end-%d" % endNode)
 for i, j, distance, direction in edges:
 	print("%d-%d,%d,%d" % (i, j, distance, direction))
 
