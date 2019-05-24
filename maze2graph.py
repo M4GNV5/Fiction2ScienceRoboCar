@@ -1,11 +1,11 @@
-import cv2
+import sys, cv2
 
 DIRECTION_EAST = 1
 DIRECTION_WEST = -1
 DIRECTION_NORTH = 2
 DIRECTION_SOUTH = -2
 
-img = cv2.imread("maze.png")
+img = cv2.imread(sys.argv[1])
 
 height, width, c = img.shape
 width = int(width / 2)
@@ -129,7 +129,7 @@ print("end - %d" % endNode)
 for i, j, distance, direction in edges:
 	print("%d-%d,%d,%d" % (i, j, distance, direction))
 
-'''
+
 for i, j, distance, direction in edges:
 	for key in nodes:
 		if nodes[key] == i:
@@ -146,4 +146,3 @@ for i, j, distance, direction in edges:
 	key = cv2.waitKey(0)
 	if key == ord('q'):
 		break
-'''
