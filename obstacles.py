@@ -12,7 +12,7 @@ contours, hierarchy = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE
 
 def isSign(contour):
     area = cv2.contourArea(contour)
-    if area < 2500:
+    if area < 500:
         return False
 
     x, y, w, h = cv2.boundingRect(contour)
@@ -28,13 +28,14 @@ def couldBeBlock(contour):
     global totalBlockerWidth
 
     area = cv2.contourArea(contour)
-    if area < 3000:
+    if area < 300:
         return False
 
     x, y, w, h = cv2.boundingRect(contour)
 
     # check if the bounding rect is approx a 2x=1y rect
-    if abs(1 - (w / 2) / h) > 0.2:
+    print(area, w, h, abs(1 - (float(w) / 1.8) / h))
+    if abs(1 - (float(w) / 1.8) / h) > 0.2:
         return False
 
     totalBlockerWidth += w
@@ -44,16 +45,17 @@ signContours = [x for x in filter(isSign, contours)]
 blockerContours = [x for x in filter(couldBeBlock, contours)]
 
 sys.stdout.write(sys.argv[1] + " - ")
-if totalBlockerWidth > 400:
+if totalBlockerWidth > 250:
     print("rb")
 elif len(signContours) > 0:
     print("stop")
 else:
     print("nothing")
 
-#img = colored
-#cv2.drawContours(img, signContours, -1, (255, 0, 0), 3)
-#cv2.drawContours(img, blockerContours, -1, (0, 255, 0), 3)
+print(totalBlockerWidth)
+img = colored
+cv2.drawContours(img, signContours, -1, (255, 0, 0), 3)
+cv2.drawContours(img, blockerContours, -1, (0, 255, 0), 3)
 
-#cv2.imshow("output", img)
-#key = cv2.waitKey(300) & 0xff
+cv2.imshow("output", img)
+key = cv2.waitKey(0) & 0xff
