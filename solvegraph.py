@@ -8,63 +8,53 @@ class GraphSolver:
 		self.edgeMap = {}
 		self.costMap = {}
 
-	def costToEnd(self, i):
-		if i == self.endNode:
-			return 0
-		if i in self.costMap:
-			return self.costMap[i][0]
+	def calculate_cost(self, i, cost, target):
+		if i in self.costMap and self.costMap[i][0] < cost:
+			return
 
-		self.costMap[i] = None
+		self.costMap[i] = (cost, target)
 
-		minCost = 9999999
-		bestTarget = None
 		for j in self.edgeMap[i]:
-			if j in self.costMap and self.costMap[j] == None:
-				continue # avoid cycles
-
-			cost = self.costToEnd(j)
-			if cost < minCost:
-				minCost = cost
-				bestTarget = j
-
-		if bestTarget == None:
-			del self.costMap[i]
-			return minCost
-
-		cost, direction = self.edgeMap[i][bestTarget]
-		self.costMap[i] = (cost + minCost, bestTarget, direction)
-
-		return self.costMap[i][0]
+			distance, direction = self.edgeMap[i][j]
+			self.calculate_cost(j, cost + distance, i)
 
 	def load_graph(self, path):
 		self.startNode, self.endNode, self.edges = maze2graph(path)
 
-		for edge in self.edges:
-			i, j, distance, direction = edge
+		for i, j, distance, direction in self.edges:
 			if i not in self.edgeMap:
 				self.edgeMap[i] = {}
 
 			self.edgeMap[i][j] = (distance, direction) 
 
 	def calculate_path(self):
-
 		self.costMap = {}
-		self.costToEnd(self.startNode)
+		self.calculate_cost(self.endNode, 0, None)
 
 		path = []
 		curr = self.startNode
 		while curr != self.endNode:
-			cost, target, direction = self.costMap[curr]
+
+			minCost = 9999
+			bestTarget = None
+			for j in self.edgeMap[curr]:
+				cost, target = self.costMap[j]
+
+				if cost < minCost:
+					minCost = cost
+					bestTarget = j
+
+			distance, direction = self.edgeMap[curr][bestTarget]
 			path.append((curr, direction))
-			curr = target
+			curr = bestTarget
 
 		return path
 
-	def delete_edge(self, i, j):
+	def delete_edge_and_set_start(self, i, j):
 		del self.edgeMap[i][j]
 		del self.edgeMap[j][i]
 
-		calculate_path()
+		self.startNode = i
 
 if __name__ == '__main__':
 	solver = GraphSolver()
