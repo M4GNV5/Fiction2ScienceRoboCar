@@ -1,77 +1,74 @@
 from maze2graph import maze2graph
 
-startNode = None
-endNode = None
-edges = None
-edgeMap = {}
-costMap = {}
+class GraphSolver:
+	def __init__(self):
+		self.startNode = None
+		self.endNode = None
+		self.edges = None
+		self.edgeMap = {}
+		self.costMap = {}
 
-def costToEnd(i):
-	if i == endNode:
-		return 0
-	
-	if i in costMap:
-		return costMap[i][0]
+	def costToEnd(self, i):
+		if i == self.endNode:
+			return 0
+		if i in self.costMap:
+			return self.costMap[i][0]
 
-	costMap[i] = None
+		self.costMap[i] = None
 
-	minCost = 9999999
-	bestTarget = None
-	for j in edgeMap[i]:
-		if j in costMap and costMap[j] == None:
-			continue # avoid cycles
+		minCost = 9999999
+		bestTarget = None
+		for j in self.edgeMap[i]:
+			if j in self.costMap and self.costMap[j] == None:
+				continue # avoid cycles
 
-		cost = costToEnd(j)
-		if cost < minCost:
-			minCost = cost
-			bestTarget = j
+			cost = self.costToEnd(j)
+			if cost < minCost:
+				minCost = cost
+				bestTarget = j
 
-	if bestTarget == None:
-		return minCost
+		if bestTarget == None:
+			del self.costMap[i]
+			return minCost
 
-	cost, direction = edgeMap[i][bestTarget]
-	costMap[i] = (cost + minCost, bestTarget, direction)
+		cost, direction = self.edgeMap[i][bestTarget]
+		self.costMap[i] = (cost + minCost, bestTarget, direction)
 
-	return costMap[i][0]
+		return self.costMap[i][0]
 
-def load_graph(path):
-	global startNode, endNode, edges
+	def load_graph(self, path):
+		self.startNode, self.endNode, self.edges = maze2graph(path)
 
-	startNode, endNode, edges = maze2graph(path)
+		for edge in self.edges:
+			i, j, distance, direction = edge
+			if i not in self.edgeMap:
+				self.edgeMap[i] = {}
 
-	for edge in edges:
-		i, j, distance, direction = edge
-		if i not in edgeMap:
-			edgeMap[i] = {}
+			self.edgeMap[i][j] = (distance, direction) 
 
-		edgeMap[i][j] = (distance, direction) 
+	def calculate_path(self):
 
-def calculate_path():
-	global costMap
+		self.costMap = {}
+		self.costToEnd(self.startNode)
 
-	costMap = {}
-	costToEnd(startNode)
+		path = []
+		curr = self.startNode
+		while curr != self.endNode:
+			cost, target, direction = self.costMap[curr]
+			path.append((curr, direction))
+			curr = target
 
-	path = []
-	curr = startNode
-	while curr != endNode:
-		cost, target, direction = costMap[curr]
-		path.append((curr, direction))
-		curr = target
+		return path
 
-	return path
+	def delete_edge(self, i, j):
+		del self.edgeMap[i][j]
+		del self.edgeMap[j][i]
 
-def delete_edge(i, j):
-	del edgeMap[i][j]
-	del edgeMap[j][i]
-
-	calculate_path()
+		calculate_path()
 
 if __name__ == '__main__':
-	load_graph("maze.png")
-	path = calculate_path()
-	print(path)
-
-	delete_edge(31, 32)
-	path = calculate_path()
+	solver = GraphSolver()
+	solver.load_graph("maze.png")
+	path = solver.calculate_path()
+	print(solver.costMap)
 	print(path)

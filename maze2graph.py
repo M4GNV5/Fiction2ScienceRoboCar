@@ -2,8 +2,8 @@ import sys, cv2
 
 DIRECTION_EAST = 1
 DIRECTION_WEST = -1
-DIRECTION_NORTH = 2
-DIRECTION_SOUTH = -2
+DIRECTION_NORTH = -2
+DIRECTION_SOUTH = 2
 
 img = None
 colored = None
