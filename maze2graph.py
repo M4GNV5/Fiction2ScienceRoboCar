@@ -5,18 +5,8 @@ DIRECTION_WEST = -1
 DIRECTION_NORTH = 2
 DIRECTION_SOUTH = -2
 
-img = cv2.imread(sys.argv[1])
-
-height, width, c = img.shape
-width = int(width / 2)
-height = int(height / 2)
-img = cv2.resize(img, (width, height), interpolation=cv2.INTER_NEAREST)
-
-colored = img
-
-img = cv2.inRange(img, (0, 0, 0), (20, 20, 20))
-img = cv2.bitwise_not(img)
-
+img = None
+colored = None
 nodeCount = 0
 nodes = {}
 edges = []
@@ -111,37 +101,59 @@ def findEnd():
 			if isNode(x, y):
 				return addNode(x, y)
 
-startNode = findStart()
-endNode = findEnd()
+def maze2graph(path):
+	global img, colored, width, height
 
-while len(unvisited) > 0:
-	x, y = unvisited.pop()
+	img = cv2.imread(path)
 
-	checkAndCreateEdge(x, y, DIRECTION_EAST)
-	checkAndCreateEdge(x, y, DIRECTION_WEST)
-	checkAndCreateEdge(x, y, DIRECTION_NORTH)
-	checkAndCreateEdge(x, y, DIRECTION_SOUTH)
+	height, width, c = img.shape
+	width = int(width / 2)
+	height = int(height / 2)
+	img = cv2.resize(img, (width, height), interpolation=cv2.INTER_NEAREST)
 
-print("count-%d" % len(edges))
-print("start-%d" % startNode)
-print("end-%d" % endNode)
-for i, j, distance, direction in edges:
-	print("%d-%d,%d,%d" % (i, j, distance, direction))
+	colored = img
 
+	img = cv2.inRange(img, (0, 0, 0), (20, 20, 20))
+	img = cv2.bitwise_not(img)
 
-for i, j, distance, direction in edges:
-	for key in nodes:
-		if nodes[key] == i:
-			xi, yi = key
-		if nodes[key] == j:
-			xj, yj = key
+	startNode = findStart()
+	endNode = findEnd()
 
-	img = colored.copy()
-	cv2.line(img, (xi, yi), (xj, yj), (255, 0, 0), 2)
-	img = cv2.resize(img, (width * 8, height * 8), interpolation=cv2.INTER_NEAREST)
-	cv2.putText(img, ("%d-%d,%d,%d" % (i, j, distance, direction)), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1)
+	while len(unvisited) > 0:
+		x, y = unvisited.pop()
 
-	cv2.imshow("output", img)
-	key = cv2.waitKey(0)
-	if key == ord('q'):
-		break
+		checkAndCreateEdge(x, y, DIRECTION_EAST)
+		checkAndCreateEdge(x, y, DIRECTION_WEST)
+		checkAndCreateEdge(x, y, DIRECTION_NORTH)
+		checkAndCreateEdge(x, y, DIRECTION_SOUTH)
+
+	return (startNode, endNode, edges)
+
+def showEdges():
+	for i, j, distance, direction in edges:
+		for key in nodes:
+			if nodes[key] == i:
+				xi, yi = key
+			if nodes[key] == j:
+				xj, yj = key
+
+		img = colored.copy()
+		cv2.line(img, (xi, yi), (xj, yj), (255, 0, 0), 2)
+		img = cv2.resize(img, (width * 8, height * 8), interpolation=cv2.INTER_NEAREST)
+		cv2.putText(img, ("%d-%d,%d,%d" % (i, j, distance, direction)), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1)
+
+		cv2.imshow("output", img)
+		key = cv2.waitKey(0) & 0xff
+		if key == ord('q'):
+			break
+
+if __name__ == '__main__':
+	startNode, endNode, edges = maze2graph(sys.argv[1])
+
+	print("count-%d" % len(edges))
+	print("start-%d" % startNode)
+	print("end-%d" % endNode)
+	for i, j, distance, direction in edges:
+		print("%d-%d,%d,%d" % (i, j, distance, direction))
+
+	showEdges()
