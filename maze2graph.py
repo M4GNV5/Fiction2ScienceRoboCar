@@ -102,7 +102,12 @@ def findEnd():
 				return addNode(x, y)
 
 def maze2graph(path):
-	global img, colored, width, height
+	global img, colored, width, height, nodeCount, nodes, edges, unvisited
+
+	nodeCount = 0
+	nodes = {}
+	edges = []
+	unvisited = []
 
 	img = cv2.imread(path)
 

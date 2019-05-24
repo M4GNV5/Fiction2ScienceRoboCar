@@ -70,5 +70,9 @@ if __name__ == '__main__':
 	solver = GraphSolver()
 	solver.load_graph("maze.png")
 	path = solver.calculate_path()
-	print(solver.costMap)
+	print(path)
+
+	solver = GraphSolver()
+	solver.load_graph("dataset/mazes/3.png")
+	path = solver.calculate_path()
 	print(path)
