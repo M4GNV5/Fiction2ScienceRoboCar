@@ -1,5 +1,10 @@
 import cv2
 
+DIRECTION_EAST = 1
+DIRECTION_WEST = -1
+DIRECTION_NORTH = 2
+DIRECTION_SOUTH = -2
+
 img = cv2.imread("maze.png")
 
 height, width, c = img.shape
@@ -71,7 +76,18 @@ def checkDirection(x, y, dx, dy):
 		other = addNode(x, y)
 	return (other, distance, x, y)
 
-def checkAndCreateEdge(x, y, dx, dy):
+def checkAndCreateEdge(x, y, direction):
+	dx = 0
+	dy = 0
+	if direction == DIRECTION_EAST:
+		dx = 1
+	elif direction == DIRECTION_WEST:
+		dx = -1
+	elif direction == DIRECTION_NORTH:
+		dy = 1
+	elif direction == DIRECTION_SOUTH:
+		dy = -1
+
 	ret = checkDirection(x, y, dx, dy)
 
 	if ret is None:
@@ -81,7 +97,7 @@ def checkAndCreateEdge(x, y, dx, dy):
 	start = nodes[(x, y)]
 
 	if (endX, endY) in unvisited:
-		edges.append((start, end, distance))
+		edges.append((start, end, distance, direction))
 
 def findStart():
 	for y in range(0, height):
@@ -102,19 +118,19 @@ endNode = findEnd()
 while len(unvisited) > 0:
 	x, y = unvisited.pop()
 
-	checkAndCreateEdge(x, y, 1, 0)
-	checkAndCreateEdge(x, y, -1, 0)
-	checkAndCreateEdge(x, y, 0, 1)
-	checkAndCreateEdge(x, y, 0, -1)
-	
+	checkAndCreateEdge(x, y, DIRECTION_EAST)
+	checkAndCreateEdge(x, y, DIRECTION_WEST)
+	checkAndCreateEdge(x, y, DIRECTION_NORTH)
+	checkAndCreateEdge(x, y, DIRECTION_SOUTH)
+
 print("count - %d" % len(edges))
 print("start - %d" % startNode)
 print("end - %d" % endNode)
-for i, j, d in edges:
-	print("%d-%d,%d,%d" % (i, j, d, 2))
+for i, j, distance, direction in edges:
+	print("%d-%d,%d,%d" % (i, j, distance, direction))
 
 '''
-for i, j, d in edges:
+for i, j, distance, direction in edges:
 	for key in nodes:
 		if nodes[key] == i:
 			xi, yi = key
@@ -124,7 +140,7 @@ for i, j, d in edges:
 	img = colored.copy()
 	cv2.line(img, (xi, yi), (xj, yj), (255, 0, 0), 2)
 	img = cv2.resize(img, (width * 8, height * 8), interpolation=cv2.INTER_NEAREST)
-	cv2.putText(img, ("%d-%d,%d,2" % (i, j, d)), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1)
+	cv2.putText(img, ("%d-%d,%d,%d" % (i, j, distance, direction)), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1)
 
 	cv2.imshow("output", img)
 	key = cv2.waitKey(0)
